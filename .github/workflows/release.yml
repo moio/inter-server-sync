@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - 'v*'
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      GOPATH: ${{ github.workspace }}
+      GO111MODULE: off
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.12.x
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        path: ./src/github.com/${{ github.repository }}
+    - name: Build
+      run: go build
+      working-directory: ${{ github.workspace }}/src/github.com/${{ github.repository }}
+    - name: Package
+      run:  tar cvzf inter-server-sync-linux-amd64.tar.gz inter-server-sync README.md
+      working-directory: ${{ github.workspace }}/src/github.com/${{ github.repository }}
+    - name: Create a Release
+      uses: actions/create-release@v1
+      id: create_release
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+         tag_name: ${{ github.ref }}
+         release_name: ${{ github.ref }}
+    
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./src/github.com/${{ github.repository }}/inter-server-sync-linux-amd64.tar.gz
+          asset_name: inter-server-sync-linux-amd64.tar.gz
+          asset_content_type: application/gzip
+
