@@ -125,7 +125,7 @@ func getProperty(filePaths []string, names []string) (string, error) {
 func ScannerFunc(path string, search string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		log.Fatal().Msgf("Couldn't open file: %s", path)
+		log.Fatal().Err(err).Msgf("Couldn't open file: %s", path)
 	}
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
